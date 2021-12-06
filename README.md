@@ -44,11 +44,11 @@ python bot.py
 - bay - ⚡️Get bayfiles.com link of telegram file.
 - go - ⚡️Get gofile.io link of telegram file.
 - storageinfo - 💾Use this command to check saved file.
-- generatecustomthumbnail - Generate customer thumbnail.
+- gencustomthumb - Generate customer thumbnail.
 - downloadmedia - 🔽Reply with the file you want to upload to the bot server.
 - clearffmpegmedia - 🗑️Use this command to delete saved media in the bot.
-- showthumbnail - 👀Show saved thumbnails.
-- deletethumbnail - 🗑delete saved thumbnails.
+- showthumb - 👀Show saved thumbnails.
+- delthumb - 🗑delete saved thumbnails.
 
 For FeedBack and Suggestions, please feel free to say in [@SpEcHlDe](https://telegram.dog/ThankTelegram)
 
