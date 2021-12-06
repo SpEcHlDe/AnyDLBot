@@ -43,7 +43,7 @@ def extractsubtitle(video_file, output_directory):
         return None
 
 
-@pyrogram.Client.on_message(pyrogram.Filters.command(["extractsubtitle"]))
+@pyrogram.Client.on_message(pyrogram.filters.command(["extractsubtitle"]))
 def extract_sub_title(bot, update):
     if str(update.from_user.id) not in Config.AUTH_USERS:
         bot.send_message(
