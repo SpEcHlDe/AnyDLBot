@@ -20,7 +20,7 @@ requests-unixsocket==0.2.0
 tqdm==4.60.0
 PyDrive
 git+git://github.com/google/chatbase-python.git
-https://github.com/prgofficial/pyrogram/archive/asyncio.zip
+asyncio
 google-api-python-client>=1.7.11,<1.7.20
 google-auth-httplib2>=0.0.3,<0.1.0
 google-auth-oauthlib>=0.4.1,<0.10.0
