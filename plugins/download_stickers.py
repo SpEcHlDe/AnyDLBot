@@ -39,9 +39,10 @@ async def DownloadStickersBot(bot, update):
     download_location = Config.DOWNLOAD_LOCATION + "/" + str(update.from_user.id) + "_DownloadStickersBot_" + str(update.from_user.id) + ".png"
     a = await bot.send_message(
         chat_id=update.chat.id,
-        text=f"Sending Sticker...",
-        reply_to_message_id=update.message_id
+        text='Sending Sticker...',
+        reply_to_message_id=update.message_id,
     )
+
     try:
         c_time = time.time()
         the_real_download_location = await bot.download_media(
@@ -80,7 +81,7 @@ async def DownloadStickersBot(bot, update):
         )
     except:
       pass
-    
+
     os.remove(the_real_download_location)
     await bot.edit_message_text(
         text=Translation.AFTER_SUCCESSFUL_UPLOAD_MSG,

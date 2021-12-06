@@ -15,7 +15,7 @@ from json import loads as json_loads
 async def func(filepath):
     if not os_path.isfile(filepath):
         return False
-    
+
     cmd = [
         "ffprobe",
         "-v",
@@ -36,6 +36,5 @@ async def func(filepath):
     stdout, stderr = await process.communicate()
     LOGGER.debug("[stdout] " + stdout.decode())
     LOGGER.debug("[stderr] " + stderr.decode())
-    
-    info = json_loads(stdout.decode())
-    return info
+
+    return json_loads(stdout.decode())

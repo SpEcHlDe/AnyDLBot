@@ -43,7 +43,7 @@ async def convert_to_audio(bot, update):
             revoke=True
         )
         return
-    if (update.reply_to_message is not None) and (update.reply_to_message.media is not None) :
+    if (update.reply_to_message is not None) and (update.reply_to_message.media is not None):
         rnom = random_char(5)
         download_location = Config.DOWNLOAD_LOCATION + "/" + f"{rnom}" + "/"
         ab=await bot.send_message(
@@ -63,11 +63,12 @@ async def convert_to_audio(bot, update):
             )
         )
         if the_real_download_location is not None:
-            a=await bot.edit_message_text(
-                text=f"Video Download Successfully, now trying to convert into Audio. \n\n⌛️Wait for some time.",
+            a = await bot.edit_message_text(
+                text='Video Download Successfully, now trying to convert into Audio. \n\n⌛️Wait for some time.',
                 chat_id=update.chat.id,
-                message_id=ab.message_id
+                message_id=ab.message_id,
             )
+
             # don't care about the extension
             # convert video to audio format
             f_name = the_real_download_location.rsplit('/',1)[-1]
@@ -99,11 +100,10 @@ async def convert_to_audio(bot, update):
                 # img.thumbnail((90, 90))
                 img.resize((90, height))
                 img.save(thumb_image_path, "JPEG")'''
-                # https://pillow.readthedocs.io/en/3.1.x/reference/Image.html#create-thumbnails
             # try to upload file
             await a.delete()
             c_time = time.time()
-            
+
             up=await bot.send_message(
             text=Translation.UPLOAD_START,
             chat_id=update.chat.id,
@@ -140,6 +140,6 @@ async def convert_to_audio(bot, update):
     else:
         await bot.send_message(
             chat_id=update.chat.id,
-            text=f"**Reply** with a telegram video file to convert.",
-            reply_to_message_id=update.message_id
+            text='**Reply** with a telegram video file to convert.',
+            reply_to_message_id=update.message_id,
         )
