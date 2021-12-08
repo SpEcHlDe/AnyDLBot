@@ -45,13 +45,6 @@ def extractsubtitle(video_file, output_directory):
 
 @pyrogram.Client.on_message(pyrogram.filters.command(["extractsubtitle"]))
 def extract_sub_title(bot, update):
-    if str(update.from_user.id) not in Config.AUTH_USERS:
-        bot.send_message(
-            chat_id=update.chat.id,
-            text=Translation.NOT_AUTH_USER_TEXT,
-            reply_to_message_id=update.message_id
-        )
-        return
     download_location = Config.DOWNLOAD_LOCATION + "/"
     if update.reply_to_message is not None:
         text = update.reply_to_message.text
