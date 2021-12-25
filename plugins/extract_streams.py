@@ -27,7 +27,7 @@ logging.getLogger("pyrogram").setLevel(logging.WARNING)
 from helper_funcs.display_progress import progress_for_pyrogram
 
 
-@pyrogram.Client.on_message(pyrogram.Filters.command(["extractstreams"]))
+@pyrogram.Client.on_message(pyrogram.filters.command(["extractstreams"]))
 async def extract_sub_title(bot, update):
     if str(update.from_user.id) not in Config.SUPER7X_DLBOT_USERS:
         await bot.send_message(
