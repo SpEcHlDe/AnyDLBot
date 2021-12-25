@@ -191,9 +191,19 @@ async def youtube_dl_call_back(bot, update):
         try:
             file_size = os.stat(download_directory).st_size
         except FileNotFoundError as exc:
-            download_directory = os.path.splitext(download_directory)[0] + "." + "mkv"
+            print('Except block enterance')
+            # download_directory = os.path.splitext(download_directory)[0] + "." + "mkv"
+            download_directory = tmp_directory_for_each_user + '/' + os.listdir(tmp_directory_for_each_user)[0]
             # https://stackoverflow.com/a/678242/4723940
             file_size = os.stat(download_directory).st_size
+        try:
+            if tg_send_type == 'video' and 'webm' in download_directory:
+                ownload_directory = download_directory.rsplit('.', 1)[0] + '.mkv'
+                os.rename(download_directory, ownload_directory)
+                download_directory = ownload_directory
+        except:
+            pass
+
         if file_size > Config.TG_MAX_FILE_SIZE:
             await bot.edit_message_text(
                 chat_id=update.message.chat.id,
