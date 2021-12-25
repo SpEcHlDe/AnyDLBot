@@ -45,13 +45,14 @@ async def get_link(bot, update):
         )
         return
     logger.info(update.from_user)
-    
+
     h5rd = random_char(5)
     a = await bot.send_message(
-          chat_id=update.chat.id,
-          text=f"Downloading Playlist...",
-          reply_to_message_id=update.message_id
+        chat_id=update.chat.id,
+        text='Downloading Playlist...',
+        reply_to_message_id=update.message_id,
     )
+
     tox = update.text
     download_location = Config.DOWNLOAD_LOCATION + "/" + f"{h5rd}" + "/"
     os.makedirs(download_location)
@@ -73,7 +74,7 @@ async def get_link(bot, update):
         '-o',
         download_location
     ]        
-  
+
     logger.info(command_to_exec)
     process = await asyncio.create_subprocess_exec(
         *command_to_exec,
@@ -86,7 +87,7 @@ async def get_link(bot, update):
     t_response = stdout.decode().strip()
     logger.info(e_response)
     logger.info(t_response)
-    
+
     filenames = next(walk(download_location), (None, None, []))[2]  # [] if no file
     c_time = time.time()
     noss = len(filenames)
@@ -94,29 +95,28 @@ async def get_link(bot, update):
     logger.info(filenames)
     nn = 0
     while nn < noss:
-      d_loc = download_location + filenames[nn]
-      logger.info(d_loc)
-      try:
-        await bot.send_document(
-            chat_id=update.chat.id,
-            document=d_loc,
-            progress=progress_for_pyrogram,
-            progress_args=(
-                Translation.UPLOAD_START,
-                a,
-                c_time
+        d_loc = download_location + filenames[nn]
+        logger.info(d_loc)
+        try:
+            await bot.send_document(
+                chat_id=update.chat.id,
+                document=d_loc,
+                progress=progress_for_pyrogram,
+                progress_args=(
+                    Translation.UPLOAD_START,
+                    a,
+                    c_time
+                )
             )
-        )
-      except Exception as e:
-        print(e)
-        pass
-      nn = nn + 1
-          
+        except Exception as e:
+            print(e)
+        nn += 1
+
     await bot.edit_message_text(
-        text=f"Playlist Uploaded!",
+        text='Playlist Uploaded!',
         chat_id=update.chat.id,
         message_id=a.message_id,
-        disable_web_page_preview=True  
+        disable_web_page_preview=True,
     )
     
  

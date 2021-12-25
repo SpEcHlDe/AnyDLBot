@@ -94,13 +94,9 @@ async def rename_doc(bot, update):
                 except:
                     thumb_image_path = None
             else:
-                width = 0
-                height = 0
                 metadata = extractMetadata(createParser(thumb_image_path))
-                if metadata.has("width"):
-                    width = metadata.get("width")
-                if metadata.has("height"):
-                    height = metadata.get("height")
+                width = metadata.get("width") if metadata.has("width") else 0
+                height = metadata.get("height") if metadata.has("height") else 0
                 # resize image
                 # ref: https://t.me/PyrogramChat/44663
                 # https://stackoverflow.com/a/21669827/4723940
@@ -110,7 +106,7 @@ async def rename_doc(bot, update):
                 # img.thumbnail((90, 90))
                 img.resize((320, height))
                 img.save(thumb_image_path, "JPEG")
-                # https://pillow.readthedocs.io/en/3.1.x/reference/Image.html#create-thumbnails
+                            # https://pillow.readthedocs.io/en/3.1.x/reference/Image.html#create-thumbnails
             c_time = time.time()
             await bot.send_document(
                 chat_id=update.chat.id,
