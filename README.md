@@ -35,7 +35,7 @@ python bot.py
 - me - 🕵️‍♂️Your details
 - ren - Rename files 📂📁
 - sshot - Screenshots 📸
-- convert2video - 📂 to📽
+- c2v - 📂 to📽
 - c2f - 📽 to 📂
 - c2a - Convert telegram video file into audio
 - trim - Trim video 🎞
