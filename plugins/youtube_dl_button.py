@@ -28,7 +28,6 @@ from translation import Translation
 import pyrogram
 logging.getLogger("pyrogram").setLevel(logging.WARNING)
 
-from pyrogram.types import InputMediaPhoto
 from helper_funcs.display_progress import progress_for_pyrogram, humanbytes
 from helper_funcs.help_uploadbot import DownLoadFile
 from hachoir.metadata import extractMetadata
@@ -37,24 +36,38 @@ from hachoir.parser import createParser
 from PIL import Image
 from helper_funcs.help_Nekmo_ffmpeg import generate_screen_shots
 from helper_funcs.ran_text import random_char
-from helper_funcs.database import thumb
-
+from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import InputMediaPhoto, InputMediaVideo, InputMediaAudio, InputMediaDocument
 
 async def youtube_dl_call_back(bot, update):
     cb_data = update.data
 
     # youtube_dl extractors
-    tg_send_type, youtube_dl_format, youtube_dl_ext, ranom = cb_data.split("|")
-    print(cb_data)
+    tg_send_type, youtube_dl_format, youtube_dl_ext, sz = cb_data.split("|")
+    szz, msd_id = sz.rsplit(' ', 1)
+    try:
+        int(szz)
+    except:
+        pass
+    '''if type(szz) is int and szz > Config.TG_MAX_FILE_SIZE:
+        try:
+            await update.answer('Choosen video is bigger than Telegram upload limit.')
+        except Exception as anss:
+            print(anss)
+            pass'''
+
+    print(cb_data, update.message.message_id, msd_id)
+
     random1 = random_char(5)
     thumb_image_path = Config.DOWNLOAD_LOCATION + \
-        "/" + str(update.from_user.id) + f'{ranom}' + ".jpg"
+        "/" + str(update.from_user.id) + ' ' + str(msd_id) + ".jpg"
     save_ytdl_json_path = Config.DOWNLOAD_LOCATION + \
-        "/" + str(update.from_user.id) + f'{ranom}' + ".json"
+        "/" + str(msd_id) + '/' + str(update.from_user.id) + ".json"
     try:
         with open(save_ytdl_json_path, "r", encoding="utf8") as f:
             response_json = json.load(f)
     except (FileNotFoundError) as e:
+        print(e, 'json file not found')
         await bot.delete_messages(
             chat_id=update.message.chat.id,
             message_ids=update.message.message_id,
@@ -103,16 +116,20 @@ async def youtube_dl_call_back(bot, update):
                 o = entity.offset
                 l = entity.length
                 youtube_dl_url = youtube_dl_url[o:o + l]
-    await bot.edit_message_text(
-        text=Translation.DOWNLOAD_START,
+    cbv = str(szz) + "//" + str(msd_id)
+    ina = InlineKeyboardMarkup([ [InlineKeyboardButton("Check Progress", callback_data=cbv)], ])
+    await bot.edit_message_caption(
+        caption=Translation.DOWNLOAD_START,
         chat_id=update.message.chat.id,
-        message_id=update.message.message_id
+        message_id=update.message.message_id,
+        reply_markup=ina
     )
     description = Translation.CUSTOM_CAPTION_UL_FILE
     if "fulltitle" in response_json:
-        description = response_json["fulltitle"][:1021]
-            # escape Markdown and special characters
-    tmp_directory_for_each_user = Config.DOWNLOAD_LOCATION + "/" + str(update.from_user.id) + f'{random1}'
+        description = response_json['fulltitle'][0:1021]
+        description = f"<a href = '{youtube_dl_url}'> {description} </a>"
+        # escape Markdown and special characters
+    tmp_directory_for_each_user = Config.DOWNLOAD_LOCATION + "/" + str(msd_id)
     if not os.path.isdir(tmp_directory_for_each_user):
         os.makedirs(tmp_directory_for_each_user)
     download_directory = tmp_directory_for_each_user + "/" + custom_file_name
@@ -184,7 +201,6 @@ async def youtube_dl_call_back(bot, update):
             os.remove(save_ytdl_json_path)
         except FileNotFoundError as exc:
             pass
-
         end_one = datetime.now()
         time_taken_for_download = (end_one -start).seconds
         file_size = Config.TG_MAX_FILE_SIZE + 1
@@ -192,6 +208,7 @@ async def youtube_dl_call_back(bot, update):
             file_size = os.stat(download_directory).st_size
         except FileNotFoundError as exc:
             print('Except block enterance')
+            print("\n", os.listdir(tmp_directory_for_each_user), "Line 217")
             # download_directory = os.path.splitext(download_directory)[0] + "." + "mkv"
             download_directory = tmp_directory_for_each_user + '/' + os.listdir(tmp_directory_for_each_user)[0]
             # https://stackoverflow.com/a/678242/4723940
@@ -221,8 +238,8 @@ async def youtube_dl_call_back(bot, update):
                 9
             )
             logger.info(images)
-            await bot.edit_message_text(
-                text=Translation.UPLOAD_START,
+            await bot.edit_message_caption(
+                caption=Translation.UPLOAD_START,
                 chat_id=update.message.chat.id,
                 message_id=update.message.message_id
             )
@@ -233,21 +250,16 @@ async def youtube_dl_call_back(bot, update):
             duration = 0
             if tg_send_type != "file":
                 metadata = extractMetadata(createParser(download_directory))
-                if metadata is not None and metadata.has("duration"):
-                    duration = metadata.get('duration').seconds
+                if metadata is not None:
+                    if metadata.has("duration"):
+                        duration = metadata.get('duration').seconds
             # get the correct width, height, and duration for videos greater than 10MB
-
-            if not os.path.exists(thumb_image_path):
-                mes = await thumb(update.from_user.id)
-                if mes != None:
-                    m = await bot.get_messages(update.message.chat.id, mes.msg_id)
-                    await m.download(file_name=thumb_image_path)
-                    thumb_image_path = thumb_image_path
-
             if os.path.exists(thumb_image_path):
+                width = 0
                 height = 0
                 metadata = extractMetadata(createParser(thumb_image_path))
-                width = metadata.get("width") if metadata.has("width") else 0
+                if metadata.has("width"):
+                    width = metadata.get("width")
                 if metadata.has("height"):
                     height = metadata.get("height")
                 if tg_send_type == "vm":
@@ -265,46 +277,42 @@ async def youtube_dl_call_back(bot, update):
                 else:
                     img.resize((90, height))
                 img.save(thumb_image_path, "JPEG")
-                            # https://pillow.readthedocs.io/en/3.1.x/reference/Image.html#create-thumbnails
-
+                # https://pillow.readthedocs.io/en/3.1.x/reference/Image.html#create-thumbnails
+                
             else:
                 thumb_image_path = None
             start_time = time.time()
             # try to upload file
             if tg_send_type == "audio":
-                await bot.send_audio(
+                await bot.edit_message_media(
                     chat_id=update.message.chat.id,
-                    audio=download_directory,
-                    caption=description,
-                    parse_mode="HTML",
-                    duration=duration,
+                    media=InputMediaAudio(media=download_directory, caption=description, duration=duration, thumb=thumb_image_path, parse_mode="HTML"),
+                    # caption=description,
+                    # parse_mode="HTML",
+                    # duration=duration,
                     # performer=response_json["uploader"],
                     # title=response_json["title"],
                     # reply_markup=reply_markup,
-                    thumb=thumb_image_path,
-                    reply_to_message_id=update.message.reply_to_message.message_id,
-                    progress=progress_for_pyrogram,
-                    progress_args=(
-                        Translation.UPLOAD_START,
-                        update.message,
-                        start_time
-                    )
+                    # thumb=thumb_image_path,
+                    # reply_to_message_id=update.message.reply_to_message.message_id,
+                    message_id=update.message.message_id
+                    # progress=progress_for_pyrogram,
+                    # progress_args=(
+                    #     Translation.UPLOAD_START,
+                    #     update.message,
+                    #     start_time
+                    # )
                 )
             elif tg_send_type == "file":
-                await bot.send_document(
+                await bot.edit_message_media(
                     chat_id=update.message.chat.id,
-                    document=download_directory,
-                    thumb=thumb_image_path,
-                    caption=description,
-                    parse_mode="HTML",
+                    media=InputMediaDocument(media=download_directory, caption=description, thumb=thumb_image_path, parse_mode="HTML"),
+                    # thumb=thumb_image_path,
+                    # caption=description,
+                    # parse_mode="HTML",
                     # reply_markup=reply_markup,
-                    reply_to_message_id=update.message.reply_to_message.message_id,
-                    progress=progress_for_pyrogram,
-                    progress_args=(
-                        Translation.UPLOAD_START,
-                        update.message,
-                        start_time
-                    )
+                    # reply_to_message_id=update.message.reply_to_message.message_id,
+                    message_id=update.message.message_id
                 )
             elif tg_send_type == "vm":
                 await bot.send_video_note(
@@ -322,24 +330,19 @@ async def youtube_dl_call_back(bot, update):
                     )
                 )
             elif tg_send_type == "video":
-                await bot.send_video(
+                await bot.edit_message_media(
                     chat_id=update.message.chat.id,
-                    video=download_directory,
-                    caption=description,
-                    parse_mode="HTML",
-                    duration=duration,
-                    width=width,
-                    height=height,
-                    supports_streaming=True,
+                    media=InputMediaVideo(media=download_directory, caption=description, width=width, height=height, duration=duration, thumb=thumb_image_path, supports_streaming=True, parse_mode="HTML"),
+                    # caption=description,
+                    # parse_mode="HTML",
+                    # duration=duration,
+                    # width=width,
+                    # height=height,
+                    # supports_streaming=True,
                     # reply_markup=reply_markup,
-                    thumb=thumb_image_path,
-                    reply_to_message_id=update.message.reply_to_message.message_id,
-                    progress=progress_for_pyrogram,
-                    progress_args=(
-                        Translation.UPLOAD_START,
-                        update.message,
-                        start_time
-                    )
+                    # thumb=thumb_image_path,
+                    # reply_to_message_id=update.message.reply_to_message.message_id,
+                    message_id=update.message.message_id
                 )
             else:
                 logger.info("Did this happen? :\\")
@@ -349,7 +352,9 @@ async def youtube_dl_call_back(bot, update):
             media_album_p = []
             if images is not None:
                 i = 0
-                caption = "Done" if is_w_f else "Done"
+                caption = "JOIN : https://t.me/TGBotsCollection \n For the List of Telegram Bots"
+                if is_w_f:
+                    caption = "/upgrade to Plan D to remove the watermark\nJOIN : https://t.me/TGBotsCollection \n For the List of Telegram Bots"
                 for image in images:
                     if os.path.exists(image):
                         if i == 0:
@@ -366,7 +371,7 @@ async def youtube_dl_call_back(bot, update):
                                     media=image
                                 )
                             )
-                        i += 1
+                        i = i + 1
             await bot.send_media_group(
                 chat_id=update.message.chat.id,
                 disable_notification=True,
