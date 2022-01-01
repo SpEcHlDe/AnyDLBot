@@ -81,22 +81,27 @@ async def rename_doc(bot, update):
                 return
             new_file_name = download_location + file_name
             os.rename(the_real_download_location, new_file_name)
+            capp=file_name.split(".", 1)[0]
             up = await bot.send_message(
                 text=Translation.UPLOAD_START,
                 chat_id=update.chat.id,
                 reply_to_message_id=update.message_id,
             )
             logger.info(the_real_download_location)
-            thumb_image_path = Config.DOWNLOAD_LOCATION + "/" + str(update.from_user.id) + "_" + ran + ".jpg"
+            thumb_image_path = Config.DOWNLOAD_LOCATION + "/" + str(update.from_user.id) + "_" + ".jpg"
             if not os.path.exists(thumb_image_path):
                 try:
                     thumb_image_path = await take_screen_shot(new_file_name, os.path.dirname(new_file_name), random.randint(0, duration - 1))
                 except:
                     thumb_image_path = None
             else:
+                width = 0
+                height = 0
                 metadata = extractMetadata(createParser(thumb_image_path))
-                width = metadata.get("width") if metadata.has("width") else 0
-                height = metadata.get("height") if metadata.has("height") else 0
+                if metadata.has("width"):
+                    width = metadata.get("width")
+                if metadata.has("height"):
+                    height = metadata.get("height")
                 # resize image
                 # ref: https://t.me/PyrogramChat/44663
                 # https://stackoverflow.com/a/21669827/4723940
@@ -106,13 +111,13 @@ async def rename_doc(bot, update):
                 # img.thumbnail((90, 90))
                 img.resize((320, height))
                 img.save(thumb_image_path, "JPEG")
-                            # https://pillow.readthedocs.io/en/3.1.x/reference/Image.html#create-thumbnails
+                # https://pillow.readthedocs.io/en/3.1.x/reference/Image.html#create-thumbnails
             c_time = time.time()
             await bot.send_document(
                 chat_id=update.chat.id,
                 document=new_file_name,
                 thumb=thumb_image_path,
-                caption=description,
+                caption=capp,
                 # reply_markup=reply_markup,
                 reply_to_message_id=update.reply_to_message.message_id,
                 progress=progress_for_pyrogram,
