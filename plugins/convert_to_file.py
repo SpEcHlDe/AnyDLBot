@@ -42,7 +42,7 @@ async def convert_to_audio(bot, update):
             revoke=True
         )
         return
-    if (update.reply_to_message is not None) and (update.reply_to_message.media is not None):
+    if (update.reply_to_message is not None) and (update.reply_to_message.media is not None) :
         rn2 = random_char(5)
         download_location = Config.DOWNLOAD_LOCATION + "/" + rn2 + "/"
         a = await bot.send_message(
@@ -61,29 +61,33 @@ async def convert_to_audio(bot, update):
                 c_time
             )
         )
-        if the_real_download_location is not None:
+        if the_real_download_location is None:
             await bot.edit_message_text(
                 text=Translation.SAVED_RECVD_DOC_FILE,
                 chat_id=update.chat.id,
                 message_id=a.message_id
             )
+        else:
             # don't care about the extension
             # convert video to audio format
-            audio_file_location_path = the_real_download_location
-            await a.delete()
-            up = await bot.send_message(
-            chat_id=update.chat.id,
-            text=Translation.UPLOAD_START,
-            reply_to_message_id=update.message_id
+            # audio_file_location_path = the_real_download_location
+            # await a.delete()
+            await bot.edit_message_text(
+                chat_id=update.chat.id,
+                text=Translation.UPLOAD_START,
+                message_id=a.message_id
             )
+            print(os.listdir(Config.DOWNLOAD_LOCATION))
             logger.info(the_real_download_location)
             # get the correct width, height, and duration for videos greater than 10MB
             # ref: message from @BotSupport
             width = 0
             height = 0
+            duration = 0
             metadata = extractMetadata(createParser(the_real_download_location))
-            duration = metadata.get('duration').seconds if metadata.has("duration") else 0
-            thumb_image_path = Config.DOWNLOAD_LOCATION + "/" + str(update.from_user.id) + ".jpg"
+            if metadata.has("duration"):
+                duration = metadata.get('duration').seconds
+            thumb_image_path = Config.DOWNLOAD_LOCATION + "/" + str(update.from_user.id) + "_" + ".jpg"
             if not os.path.exists(thumb_image_path):
                 thumb_image_path = None
             else:
@@ -100,15 +104,14 @@ async def convert_to_audio(bot, update):
                 img = Image.open(thumb_image_path)
                 # https://stackoverflow.com/a/37631799/4723940
                 # img.thumbnail((90, 90))
-                img.resize((90, height))
+                img.resize((90, 90))
                 img.save(thumb_image_path, "JPEG")
                 # https://pillow.readthedocs.io/en/3.1.x/reference/Image.html#create-thumbnails
             # try to upload file
             c_time = time.time()
-            await bot.send_audio(
+            await bot.send_document(
                 chat_id=update.chat.id,
-                audio=audio_file_location_path,
-                duration=duration,
+                document=the_real_download_location,
                 # performer="",
                 # title="",
                 # reply_markup=reply_markup,
@@ -122,9 +125,9 @@ async def convert_to_audio(bot, update):
                 )
             )
             try:
-                os.remove(thumb_image_path)
-                os.remove(the_real_download_location)
-                os.remove(audio_file_location_path)
+                # os.remove(thumb_image_path)
+                # os.remove(the_real_download_location)
+                # os.remove(audio_file_location_path)
                 shutil.rmtree(download_location)
             except:
                 pass

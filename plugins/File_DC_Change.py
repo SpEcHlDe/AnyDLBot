@@ -34,7 +34,7 @@ from hachoir.parser import createParser
 from PIL import Image
 
 
-@pyrogram.Client.on_message(pyrogram.filters.command(["ren"]))
+@pyrogram.Client.on_message(pyrogram.filters.command(["dc_change"]))
 async def rename_doc(bot, update):
     if update.from_user.id not in Config.AUTH_USERS:
         await bot.delete_messages(
@@ -43,17 +43,21 @@ async def rename_doc(bot, update):
             revoke=True
         )
         return
-    if (" " in update.text) and (update.reply_to_message is not None):
-        cmd, file_name = update.text.split(" ", 1)
-        description = Translation.CUSTOM_CAPTION_UL_FILE
-        rfhf = random_char(5)
-        download_location = Config.DOWNLOAD_LOCATION + "/" + f'{rfhf}' + "/"
+    if update.reply_to_message is not None:
+        # cmd, file_name = update.text.split(" ", 1)
+        # description = Translation.CUSTOM_CAPTION_UL_FILE
+        r5 = random_char(5)
+        download_location = Config.DOWNLOAD_LOCATION + "/" + f'{r5}' + "/"
         a = await bot.send_message(
             chat_id=update.chat.id,
             text=Translation.DOWNLOAD_FILE,
             reply_to_message_id=update.message_id
         )
         c_time = time.time()
+        if update.caption is not None:
+            caption=update.caption
+        else:
+            caption=""
         the_real_download_location = await bot.download_media(
             message=update.reply_to_message,
             file_name=download_location,
@@ -64,31 +68,21 @@ async def rename_doc(bot, update):
                 c_time
             )
         )
-        await a.delete()
         if the_real_download_location is None:
-            await bot.send_message(
+            await bot.edit_message_text(
                 text=Translation.FILE_NOT_FOUND,
                 chat_id=update.chat.id,
-                reply_to_message_id=update.message_id
+                message_id=a.message_id
             )
         else:
-            if "IndianMovie" in the_real_download_location:
-                await bot.edit_message_text(
-                    text=Translation.RENAME_403_ERR,
-                    chat_id=update.chat.id,
-                    message_id=a.message_id
-                )
-                return
-            new_file_name = download_location + file_name
-            os.rename(the_real_download_location, new_file_name)
-            capp=file_name.split(".", 1)[0]
-            up = await bot.send_message(
+            await bot.edit_message_text(
                 text=Translation.UPLOAD_START,
                 chat_id=update.chat.id,
-                reply_to_message_id=update.message_id,
+                message_id=a.message_id,
             )
             logger.info(the_real_download_location)
-            thumb_image_path = Config.DOWNLOAD_LOCATION + "/" + str(update.from_user.id) + "_" + ".jpg"
+            # thumb_image_path = Config.DOWNLOAD_LOCATION + "/" + str(update.from_user.id) + "_" + ".jpg"
+            
             if not os.path.exists(thumb_image_path):
                 try:
                     thumb_image_path = await take_screen_shot(new_file_name, os.path.dirname(new_file_name), random.randint(0, duration - 1))
@@ -115,33 +109,33 @@ async def rename_doc(bot, update):
             c_time = time.time()
             await bot.send_document(
                 chat_id=update.chat.id,
-                document=new_file_name,
-                thumb=thumb_image_path,
-                caption=capp,
+                document=the_real_download_location,
+                # thumb=thumb_image_path,
+                caption=caption,
                 # reply_markup=reply_markup,
                 reply_to_message_id=update.reply_to_message.message_id,
                 progress=progress_for_pyrogram,
                 progress_args=(
                     Translation.UPLOAD_START,
-                    up, 
+                    a, 
                     c_time
                 )
             )
             try:
-                os.remove(new_file_name)
-                os.remove(thumb_image_path)
+                # os.remove(new_file_name)
+                # os.remove(thumb_image_path)
                 shutil.rmtree(download_location)
             except:
                 pass
             await bot.edit_message_text(
                 text=Translation.AFTER_SUCCESSFUL_UPLOAD_MSG,
                 chat_id=update.chat.id,
-                message_id=up.message_id,
+                message_id=a.message_id,
                 disable_web_page_preview=True
             )
     else:
         await bot.send_message(
             chat_id=update.chat.id,
-            text=Translation.REPLY_TO_DOC_FOR_RENAME_FILE,
+            text=f'Reply to a Telegram file to change its Data Center.',
             reply_to_message_id=update.message_id
         )
