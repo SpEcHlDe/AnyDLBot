@@ -29,7 +29,7 @@ from helper_funcs.display_progress import progress_for_pyrogram
 
 @pyrogram.Client.on_message(pyrogram.filters.command(["extractstreams"]))
 async def extract_sub_title(bot, update):
-    if str(update.from_user.id) not in Config.SUPER7X_DLBOT_USERS:
+    if str(update.from_user.id) not in Config.AUTH_USERS:
         await bot.send_message(
             chat_id=update.chat.id,
             text=Translation.NOT_AUTH_USER_TEXT,
