@@ -54,10 +54,7 @@ async def rename_doc(bot, update):
             reply_to_message_id=update.message_id
         )
         c_time = time.time()
-        if update.caption is not None:
-            caption=update.caption
-        else:
-            caption=""
+        caption = update.caption if update.caption is not None else ""
         the_real_download_location = await bot.download_media(
             message=update.reply_to_message,
             file_name=download_location,
@@ -82,20 +79,16 @@ async def rename_doc(bot, update):
             )
             logger.info(the_real_download_location)
             # thumb_image_path = Config.DOWNLOAD_LOCATION + "/" + str(update.from_user.id) + "_" + ".jpg"
-            
+
             if not os.path.exists(thumb_image_path):
                 try:
                     thumb_image_path = await take_screen_shot(new_file_name, os.path.dirname(new_file_name), random.randint(0, duration - 1))
                 except:
                     thumb_image_path = None
             else:
-                width = 0
-                height = 0
                 metadata = extractMetadata(createParser(thumb_image_path))
-                if metadata.has("width"):
-                    width = metadata.get("width")
-                if metadata.has("height"):
-                    height = metadata.get("height")
+                width = metadata.get("width") if metadata.has("width") else 0
+                height = metadata.get("height") if metadata.has("height") else 0
                 # resize image
                 # ref: https://t.me/PyrogramChat/44663
                 # https://stackoverflow.com/a/21669827/4723940
@@ -105,7 +98,7 @@ async def rename_doc(bot, update):
                 # img.thumbnail((90, 90))
                 img.resize((320, height))
                 img.save(thumb_image_path, "JPEG")
-                # https://pillow.readthedocs.io/en/3.1.x/reference/Image.html#create-thumbnails
+                            # https://pillow.readthedocs.io/en/3.1.x/reference/Image.html#create-thumbnails
             c_time = time.time()
             await bot.send_document(
                 chat_id=update.chat.id,
@@ -136,6 +129,6 @@ async def rename_doc(bot, update):
     else:
         await bot.send_message(
             chat_id=update.chat.id,
-            text=f'Reply to a Telegram file to change its Data Center.',
-            reply_to_message_id=update.message_id
+            text='Reply to a Telegram file to change its Data Center.',
+            reply_to_message_id=update.message_id,
         )
