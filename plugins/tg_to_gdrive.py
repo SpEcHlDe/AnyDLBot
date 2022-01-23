@@ -29,9 +29,7 @@ async def tg_to_gdrive_upload(bot, update):
         )
         return
     logger.info(update.from_user)
-    if update.reply_to_message is None:
-        await bot.send_message(text="Reply to any file", chat_id=update.chat.id, reply_to_message_id=update.message_id)
-    else:
+ if update.reply_to_message is not None:
     download_location = Config.DOWNLOAD_LOCATION + "/"
     reply_message = await bot.send_message(
         chat_id=update.chat.id,
@@ -97,3 +95,5 @@ async def tg_to_gdrive_upload(bot, update):
         if Config.INDEX_URL:
             await generate_short_link(reply_message, index_url, up_name)
         await reply_message.delete()
+ else:
+    await bot.send_message(text="reply to any file")
