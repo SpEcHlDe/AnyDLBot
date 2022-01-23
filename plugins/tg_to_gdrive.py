@@ -21,8 +21,6 @@ else:
 
 @pyrogram.Client.on_message(pyrogram.filters.command(["tleech"]))
 async def tg_to_gdrive_upload(bot, update):
-    
-async def get_link(bot, update):
     if update.from_user.id not in Config.AUTH_USERS:
         await bot.delete_messages(
             chat_id=update.chat.id,
