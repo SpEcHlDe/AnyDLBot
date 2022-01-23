@@ -21,6 +21,19 @@ else:
 
 @pyrogram.Client.on_message(pyrogram.filters.command(["tleech"]))
 async def tg_to_gdrive_upload(bot, update):
+    
+async def get_link(bot, update):
+    if update.from_user.id not in Config.AUTH_USERS:
+        await bot.delete_messages(
+            chat_id=update.chat.id,
+            message_ids=update.message_id,
+            revoke=True
+        )
+        return
+    logger.info(update.from_user)
+    if update.reply_to_message is None:
+        await bot.send_message(text="Reply to any file", chat_id=update.chat.id, reply_to_message_id=update.message_id)
+    else:
     download_location = Config.DOWNLOAD_LOCATION + "/"
     reply_message = await bot.send_message(
         chat_id=update.chat.id,
