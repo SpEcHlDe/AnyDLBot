@@ -82,12 +82,13 @@ async def tg_to_gdrive_upload(bot, update):
                 pass
             logger.info(f"Upload Name : {up_name}")
             drive = gdriveTools.GoogleDriveHelper(up_name)
-            gd_url, index_url = drive.upload(download_directory)
-            button = [[InlineKeyboardButton(text="☁️ Drive Link", url=f"{gd_url}")]]
+            gd_url, index_url = drive.upload(download_directory)]
             if Config.INDEX_URL:
                 logger.info(index_url)
-                button.append(InlineKeyboardButton(text="⚡️ Index Link", url=f"{index_url}"))
-            button_markup = pyrogram.types.InlineKeyboardMarkup(button)
+                button = [[InlineKeyboardButton(text="☁️ Drive Link", url=f"{gd_url}"), InlineKeyboardButton(text"⚡️ Index Link", url=f"{index_url}")]]
+            else:
+                button = [[InlineKeyboardButton(text="☁️ Drive Link", url=f"{gd_url}")]]
+            button_markup = InlineKeyboardMarkup(button)
             await bot.send_message(
                 text=f"🤖: <b>{up_name}</b> has been Uploaded successfully to your Cloud🤒 \n📀 Size: {size}",
                 chat_id=update.chat.id,
