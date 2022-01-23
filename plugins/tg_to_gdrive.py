@@ -13,6 +13,7 @@ from helper_funcs.display_progress import progress_for_pyrogram
 from plugins.gdriveupload import get_path_size
 from translation import Translation
 from datetime import datetime
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 if bool(os.environ.get("WEBHOOK", False)):
     from sample_config import Config
@@ -82,11 +83,10 @@ async def tg_to_gdrive_upload(bot, update):
             logger.info(f"Upload Name : {up_name}")
             drive = gdriveTools.GoogleDriveHelper(up_name)
             gd_url, index_url = drive.upload(download_directory)
-            button = []
-            button.append([pyrogram.types.InlineKeyboardButton(text="☁️ CloudUrl ☁️", url=f"{gd_url}")])
+            button = [[InlineKeyboardButton(text="☁️ Drive Link", url=f"{gd_url}")]]
             if Config.INDEX_URL:
                 logger.info(index_url)
-                button.append([pyrogram.types.InlineKeyboardButton(text="ℹ️ IndexUrl ℹ️", url=f"{index_url}")])
+                button.append(InlineKeyboardButton(text="⚡️ Index Link", url=f"{index_url}")])
             button_markup = pyrogram.types.InlineKeyboardMarkup(button)
             await bot.send_message(
                 text=f"🤖: <b>{up_name}</b> has been Uploaded successfully to your Cloud🤒 \n📀 Size: {size}",
