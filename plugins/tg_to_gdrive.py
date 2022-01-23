@@ -82,7 +82,7 @@ async def tg_to_gdrive_upload(bot, update):
                 pass
             logger.info(f"Upload Name : {up_name}")
             drive = gdriveTools.GoogleDriveHelper(up_name)
-            gd_url, index_url = drive.upload(download_directory)]
+            gd_url, index_url = drive.upload(download_directory)
             if Config.INDEX_URL:
                 logger.info(index_url)
                 button = [[InlineKeyboardButton(text="☁️ Drive Link", url=f"{gd_url}"), InlineKeyboardButton(text"⚡️ Index Link", url=f"{index_url}")]]
