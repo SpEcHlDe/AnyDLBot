@@ -96,5 +96,7 @@ async def tg_to_gdrive_upload(bot, update):
             if Config.INDEX_URL:
                 await generate_short_link(reply_message, index_url, up_name)
             await reply_message.delete()
+    elif ValueError:
+        await bot.send_message(text="This message doesn't contain any downloadable media", chat_id=update.chat.id, reply_to_message_id=update.message_id)
     else:
-       await bot.send_message(text="reply to any file")
+        await bot.send_message(text="Reply to downlodable media", chat_id=update.chat.id, reply_to_message_id=update.message_id)
