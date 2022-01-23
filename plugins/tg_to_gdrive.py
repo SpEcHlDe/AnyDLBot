@@ -84,9 +84,9 @@ async def tg_to_gdrive_upload(bot, update):
             drive = gdriveTools.GoogleDriveHelper(up_name)
             gd_url, index_url = drive.upload(download_directory)
             if Config.INDEX_URL:
-                button = [[InlineKeyboardButton("☁️ Drive Link", url=gd_url"), InlineKeyboardButton("⚡️ Index Link", url=index_url")]]
+                button = [[InlineKeyboardButton(text="☁️ Drive Link", url=gd_url), InlineKeyboardButton(text="⚡️ Index Link", url=index_url)]]
             else:
-                button = [[InlineKeyboardButton("☁️ Drive Link", url=gd_url")]]
+                button = [[InlineKeyboardButton(text="☁️ Drive Link", url=gd_url)]]
             button_markup = InlineKeyboardMarkup(button)
             await bot.send_message(
                 text=f"🤖: <b>{up_name}</b> has been Uploaded successfully to your Cloud🤒 \n📀 Size: {size}",
