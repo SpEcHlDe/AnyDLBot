@@ -44,3 +44,4 @@ class Config((object)):
     IS_TEAM_DRIVE = os.environ.get("IS_TEAM_DRIVE", False)
     USE_SERVICE_ACCOUNTS = os.environ.get("USE_SERVICE_ACCOUNTS", False)
     INDEX_URL = os.environ.get("INDEX_URL", "")
+    parent_id = os.environ.get("GDRIVE_FOLDER_ID", "")
