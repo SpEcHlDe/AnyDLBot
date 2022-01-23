@@ -86,7 +86,7 @@ async def tg_to_gdrive_upload(bot, update):
             button = [[InlineKeyboardButton(text="☁️ Drive Link", url=f"{gd_url}")]]
             if Config.INDEX_URL:
                 logger.info(index_url)
-                button.append(InlineKeyboardButton(text="⚡️ Index Link", url=f"{index_url}")])
+                button.append(InlineKeyboardButton(text="⚡️ Index Link", url=f"{index_url}"))
             button_markup = pyrogram.types.InlineKeyboardMarkup(button)
             await bot.send_message(
                 text=f"🤖: <b>{up_name}</b> has been Uploaded successfully to your Cloud🤒 \n📀 Size: {size}",
