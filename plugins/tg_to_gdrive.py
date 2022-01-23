@@ -28,9 +28,8 @@ async def tg_to_gdrive_upload(bot, update):
         reply_to_message_id=update.message_id
     )
     c_time = time.time()
-    try:
-       the_real_download_location = await bot.download_media(
-        message=update,
+    the_real_download_location = await bot.download_media(
+        message=update.reply_to_message,
         file_name=download_location,
         progress=progress_for_pyrogram,
         progress_args=(
@@ -39,12 +38,7 @@ async def tg_to_gdrive_upload(bot, update):
             c_time
         )
     )
-    except Exception as e:
-        logger.error(str(e))
-        pass
-    if the_real_download_location is None:
-        return await reply_message.edit_text("File Download Failed")
-    else:
+    if the_real_download_location is not None:
         try:
             await bot.edit_message_text(
                 text=Translation.SAVED_RECVD_DOC_FILE,
@@ -53,24 +47,32 @@ async def tg_to_gdrive_upload(bot, update):
             )
         except:
             pass
+    txt = update.text
+    if txt.find("rename") > -1 and len(txt[txt.find("rename") + 7:]) > 0:
+        custom_file_name = txt[txt.find("rename") + 7:]
+        custom_file_name = await sanitize_file_name(custom_file_name)
+        custom_file_name = await sanitize_text(custom_file_name)
+        new_file_name = download_location + custom_file_name
+        os.rename(the_real_download_location, new_file_name)
+        the_real_download_location = new_file_name
     download_directory = the_real_download_location
     if os.path.exists(download_directory):
+        end_one = datetime.now()
         up_name = pathlib.PurePath(download_directory).name
         size = get_readable_file_size(get_path_size(download_directory))
         try:
             await bot.edit_message_text(
-                text="📥Download Completed!!!\nNow Uploading to GDrive.",
+                text="Download Completed!!!\n Upload in progress",
                 chat_id=reply_message.chat.id,
                 message_id=reply_message.message_id
             )
         except Exception as e:
-            logger.error(str(e))
+            logger.info(str(e))
             pass
         logger.info(f"Upload Name : {up_name}")
         drive = gdriveTools.GoogleDriveHelper(up_name)
         gd_url, index_url = drive.upload(download_directory)
-        uri = str_to_b64(index_url)
-        url = f"https://{Config.VIDEO_PLAYER_URL}/play?id={uri}"
+        button = []
         button.append([pyrogram.types.InlineKeyboardButton(text="☁️ CloudUrl ☁️", url=f"{gd_url}")])
         if Config.INDEX_URL:
             logger.info(index_url)
@@ -80,10 +82,7 @@ async def tg_to_gdrive_upload(bot, update):
             text=f"🤖: <b>{up_name}</b> has been Uploaded successfully to your Cloud🤒 \n📀 Size: {size}",
             chat_id=update.chat.id,
             reply_to_message_id=update.message_id,
-            disable_web_page_preview=True,
             reply_markup=button_markup)
-        try:
-            os.remove(download_directory)
-        except:
-            pass
+        if Config.INDEX_URL:
+            await generate_short_link(reply_message, index_url, up_name)
         await reply_message.delete()
