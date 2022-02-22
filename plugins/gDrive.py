@@ -20,7 +20,7 @@ else:
 # the Strings used for this "thing"
 from translation import Translation
 
-import pyrogram
+from pyrogram import Client as AnyDL, filters
 logging.getLogger("pyrogram").setLevel(logging.WARNING)
 
 from helper_funcs.display_progress import humanbytes
@@ -29,7 +29,7 @@ from helper_funcs.display_progress import humanbytes
 from pydrive.auth import GoogleAuth
 
 
-@Client.on_message(pyrogram.filters.command(["gauth"]))
+@AnyDL.on_message(filters.command(["gauth"]))
 def g_auth(bot, update):
     Config.G_DRIVE_AUTH_DRQ[str(update.from_user.id)] = GoogleAuth()
     auth_url = Config.G_DRIVE_AUTH_DRQ[str(update.from_user.id)].GetAuthUrl()
@@ -41,7 +41,7 @@ def g_auth(bot, update):
     )
 
 
-@Client.on_message(pyrogram.filters.command(["gsetup"]))
+@AnyDL.on_message(filters.command(["gsetup"]))
 def g_setup(bot, update):
     recvd_commands = update.command
     if len(recvd_commands) == 2:
