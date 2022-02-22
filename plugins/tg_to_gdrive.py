@@ -96,7 +96,6 @@ async def tg_to_gdrive_upload(bot, update):
                     chat_id=update.chat.id,
                     reply_to_message_id=update.message_id,
                     reply_markup=button_markup)
-               await reply_message.delete()
     except ValueError as err:
         if update.from_user.name.isspace() or update.from_user.name == "":
             mention = f'[user](tg://user?id={update.from_user.id})'
