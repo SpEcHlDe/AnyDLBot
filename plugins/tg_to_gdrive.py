@@ -4,7 +4,8 @@ import os
 import pathlib
 import time
 
-import pyrogram
+from pyrogram import Client as AnyDL, filters
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot import logger
 from helper_funcs import gdriveTools
@@ -19,10 +20,8 @@ if bool(os.environ.get("WEBHOOK", False)):
 else:
     from config import Config
 
-@pyrogram.Client.on_message(pyrogram.filters.command(["tleech"]))
+@AnyDL.on_message(filters.command(["tleech"]))
 async def tg_to_gdrive_upload(bot, update):
-    
-async def get_link(bot, update):
     if update.from_user.id not in Config.AUTH_USERS:
         await bot.delete_messages(
             chat_id=update.chat.id,
@@ -31,6 +30,7 @@ async def get_link(bot, update):
         )
         return
     logger.info(update.from_user)
+ try:
     if update.reply_to_message is None:
         await bot.send_message(text="Reply to any file", chat_id=update.chat.id, reply_to_message_id=update.message_id)
     else:
@@ -85,12 +85,12 @@ async def get_link(bot, update):
         logger.info(f"Upload Name : {up_name}")
         drive = gdriveTools.GoogleDriveHelper(up_name)
         gd_url, index_url = drive.upload(download_directory)
-        button = []
-        button.append([pyrogram.types.InlineKeyboardButton(text="☁️ CloudUrl ☁️", url=f"{gd_url}")])
         if Config.INDEX_URL:
             logger.info(index_url)
-            button.append([pyrogram.types.InlineKeyboardButton(text="ℹ️ IndexUrl ℹ️", url=f"{index_url}")])
-        button_markup = pyrogram.types.InlineKeyboardMarkup(button)
+            button = ([InlineKeyboardButton(text="⚡️ Index Link", url=f"{index_url}")])
+        else:
+            button = [([InlineKeyboardButton(text="☁️ Drive Link", url=f"{gd_url}")])]
+        button_markup = InlineKeyboardMarkup(button)
         await bot.send_message(
             text=f"🤖: <b>{up_name}</b> has been Uploaded successfully to your Cloud🤒 \n📀 Size: {size}",
             chat_id=update.chat.id,
@@ -99,3 +99,5 @@ async def get_link(bot, update):
         if Config.INDEX_URL:
             await generate_short_link(reply_message, index_url, up_name)
         await reply_message.delete()
+ except ValueError as err:
+    await bot.send_message(text=update.from_user.mention,'Your download has been stopped due to:\n', err, chat_id=update.chat.id, reply_to_message_id=update.message_id)
