@@ -102,4 +102,4 @@ async def tg_to_gdrive_upload(bot, update):
             mention = f'[user](tg://user?id={update.from_user.id})'
         else:
             mention = f'[{name}](tg://user?id={update.from_user.id})'
-        await bot.edit_message_text(text=f'{mention} {err}', chat_id=update.chat.id)
+        await bot.edit_message_text(text=f'{mention} {err}', chat_id=update.chat.id, message_id=reply_message.message_id)
