@@ -98,8 +98,8 @@ async def tg_to_gdrive_upload(bot, update):
                     reply_markup=button_markup)
     except ValueError as err:
         name = update.from_user.first_name
-        if name.isspace() or name == "":
+        if name == "" or name.isspace():
             mention = f'[user](tg://user?id={update.from_user.id})'
         else:
             mention = f'[{name}](tg://user?id={update.from_user.id})'
-        await bot.send_message(text=f'{mention} Your download has been stopped due to:\n{err}', chat_id=update.chat.id, reply_to_message_id=update.message_id)
+        await bot.edit_message_text(text=f'{mention} {err}', chat_id=update.chat.id, reply_to_message_id=update.message_id)
