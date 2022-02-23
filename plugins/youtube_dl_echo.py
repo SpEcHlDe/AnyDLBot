@@ -31,10 +31,10 @@ from helper_funcs.help_uploadbot import DownLoadFile
 from helper_funcs.ran_text import random_char
 
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from pyrogram import filters
+from pyrogram import filters, Client as AnyDL
 from pyrogram.errors import UserNotParticipant, UserBannedInChannel
 
-@pyrogram.Client.on_message(filters.private & filters.regex(pattern=".*http.*"))
+@AnyDL.on_message(filters.private & filters.regex(pattern=".*http.*"))
 async def echo(bot, update):
     if update.from_user.id in Config.BANNED_USERS:
         await update.reply_text("You are B A N N E D 🤣🤣🤣🤣")
